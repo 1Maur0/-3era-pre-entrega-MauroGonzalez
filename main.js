@@ -1,8 +1,8 @@
-let name = prompt("What is your name?");
-let playGame = confirm(`Hi ${name}, do you want to play this game?`);
-
-if (playGame) {
-  let questions = [    {      question: "Where was Manuel Belgrano born?",      answers: ["USA", "France", "Argentina", "UK"],
+const quizData = {
+  questions: [
+    {
+      question: "Where was Manuel Belgrano born?",
+      answers: ["USA", "France", "Argentina", "UK"],
       correctAnswer: "Argentina"
     },
     {
@@ -15,29 +15,63 @@ if (playGame) {
       answers: ["Magnesium", "Oxygen", "Potassium", "Sodium"],
       correctAnswer: "Oxygen"
     }
-  ];
+  ]
+};
+// Storage part
 
-  function playQuiz(questions) {
-    let score = 0;
-    for (let i = 0; i < questions.length; i++) {
-      let question = questions[i].question;
-      let answers = questions[i].answers;
-      let correctAnswer = questions[i].correctAnswer;
-      
-      alert(question);
-      alert(answers);
-      let userAnswer = prompt("Write your answer");
-      if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
-        alert("You are right!");
-        score++;
-      } else {
-        alert("You are wrong.");
-      }
-    }
-    alert(`Your final score is ${score}/${questions.length}`);
+localStorage.setItem('quizData', JSON.stringify(quizData));
+
+
+const storedQuizData = JSON.parse(localStorage.getItem('quizData'));
+
+//song 
+const song = new Audio('./mariobros.mp3');
+
+
+function createQuiz(data) {
+  const container = document.querySelector('#container');
+  let score = 0;
+  let questionNumber = 0;
+
+  function showQuestion() {
+    const question = document.createElement('h2');
+    question.textContent = data.questions[questionNumber].question;
+    container.appendChild(question);
+
+    const answers = document.createElement('div');
+    data.questions[questionNumber].answers.forEach(answer => {
+      const answerButton = document.createElement('button');
+      answerButton.textContent = answer;
+      answerButton.addEventListener('click', () => {
+        if (answer === data.questions[questionNumber].correctAnswer) {
+          score++;
+        }
+        questionNumber++;
+        if (questionNumber < data.questions.length) {
+          container.innerHTML = '';
+          showQuestion();
+        } else {
+          container.innerHTML = '';
+          showScore();
+        }
+      });
+      answers.appendChild(answerButton);
+    });
+    container.appendChild(answers);
   }
 
-  playQuiz(questions);
-} else {
-  alert(`See you later, ${name}!`);
+  function showScore() {
+    const scoreDisplay = document.createElement('p');
+    scoreDisplay.textContent = `Your final score is ${score}/${data.questions.length}`;
+    container.appendChild(scoreDisplay);
+
+   
+    if (score === data.questions.length) {
+      song.play();
+    }
+  }
+
+  showQuestion();
 }
+
+createQuiz(storedQuizData);
